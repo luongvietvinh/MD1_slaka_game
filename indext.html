@@ -1,0 +1,197 @@
+<! DOCTYPE html >
+< html >
+< >
+< title > Trò chơi rắn </ title >
+</ head >
+
+< body >
+
+< div  id = " score " > 0 </ div >
+< canvas  id = " solidboard " width = " 400 " height = " 400 " > </ canvas >
+
+< style >
+# ván rắn {
+vị trí : tuyệt đối;
+top :  50 % ;
+trái :  50 % ;
+biến đổi :  dịch ( -50 % ,  -50 % );
+}
+# điểm {
+text-align : center;
+kích thước phông chữ :  140 px ;
+}
+</ style >
+</ body >
+
+< script >
+const  board_border  =  'đen' ;
+const  board_background  =  "trắng" ;
+const  solid_col  =  'lightblue' ;
+const  solid_border  =  'darkblue' ;
+
+để  rắn  =  [
+{ x : 200 ,  y : 200 } ,
+{ x : 190 ,  y : 200 } ,
+{ x : 180 ,  y : 200 } ,
+{ x : 170 ,  y : 200 } ,
+{ x : 160 ,  y : 200 }
+]
+
+cho  điểm  =  0 ;
+// Đúng nếu thay đổi hướng
+hãy để  change_direction  =  false ;
+// Vận tốc ngang
+để thức  ăn_x ;
+để thức  ăn_y ;
+cho  dx  =  10 ;
+// Vận tốc thẳng đứng
+cho  dy  =  0 ;
+
+
+// Lấy phần tử canvas
+const  solidboard  =  tài liệu . getElementById ( "bảng rắn" ) ;
+// Trả về bối cảnh vẽ hai chiều
+const  solidboard_ctx  =  bảng rắn . getContext ( "2d" ) ;
+// Bắt đầu trò chơi
+chính ( ) ;
+
+gen_food ( ) ;
+
+tài liệu . addEventListener ( "keydown" ,  change_direction ) ;
+
+// hàm chính được gọi nhiều lần để giữ cho trò chơi chạy
+hàm  main ( )  {
+
+if  ( has_game_ised ( ) )  return ;
+
+change_direction  =  false ;
+setTimeout ( function  onTick ( )  {
+clear_board ( ) ;
+drawFood ( ) ;
+move_snake ( ) ;
+drawSnake ( ) ;
+// Lặp lại
+chính ( ) ;
+} ,  100 )
+}
+
+// vẽ đường viền xung quanh canvas
+function  clear_board ( )  {
+// Chọn màu để tô bản vẽ
+solidboard_ctx . fillStyle  =  board_background ;
+// Chọn màu cho đường viền của canvas
+solidboard_ctx . strokestyle  =  board_border ;
+// Vẽ một hình chữ nhật "lấp đầy" để che toàn bộ khung vẽ
+solidboard_ctx . fillRect ( 0 ,  0 ,  solidboard . width ,  solidboard . height ) ;
+// Vẽ "đường viền" xung quanh toàn bộ khung vẽ
+solidboard_ctx . strokeRect ( 0 ,  0 ,  solidboard . width ,  solidboard . height ) ;
+}
+
+// Vẽ con rắn trên canvas
+function  drawSnake ( )  {
+// Vẽ từng phần
+con rắn . forEach ( drawSnakePart )
+}
+
+function  drawFood ( )  {
+solidboard_ctx . fillStyle  =  ' lightgreen ' ;
+solidboard_ctx . strokestyle  =  'darkgreen' ;
+solidboard_ctx . fillRect ( food_x ,  food_y ,  10 ,  10 ) ;
+solidboard_ctx . strokeRect ( food_x ,  food_y ,  10 ,  10 ) ;
+}
+
+// Vẽ một phần con rắn
+function  drawSnakePart ( solidPart )  {
+
+// Đặt màu cho phần con rắn
+solidboard_ctx . fillStyle  =  solid_col ;
+// Đặt màu viền cho phần con rắn
+solidboard_ctx . strokestyle  =  solid_border ;
+// Vẽ một hình chữ nhật "lấp đầy" để thể hiện phần con rắn tại tọa độ
+// phần nằm
+solidboard_ctx . fillRect ( solidPart . x ,  solidPart . y ,  10 ,  10 ) ;
+// Vẽ đường viền xung quanh phần con rắn
+solidboard_ctx . strokeRect ( solidPart . x ,  solidPart . y ,  10 ,  10 ) ;
+}
+
+function  has_game_ised ( )  {
+for  ( cho  i  =  4 ;  i  <  rắn . length ;  i ++ )  {
+if  ( rắn [ i ] . x  ===  rắn [ 0 ] . x  &&  rắn [ i ] . y  ===  rắn [ 0 ] . y )  trả về  true
+}
+const  hitLeftWall  =  con rắn [ 0 ] . x  <  0 ;
+const  hitRightWall  =  rắn [ 0 ] . x  >  ván rắn . chiều rộng  -  10 ;
+const  hitToptWall  =  rắn [ 0 ] . y  <  0 ;
+const  hitBottomWall  =  con rắn [ 0 ] . y  >  ván rắn . chiều cao  -  10 ;
+trả lại  hitLeftWall  ||  hitRightWall  ||  hitToptWall  ||  hitBottomWall
+}
+
+function  random_food ( tối thiểu ,  tối đa )  {
+trả về  Toán . round ( ( Math . random ( )  *  ( max - min )  +  min )  /  10 )  *  10 ;
+}
+
+function  gen_food ( )  {
+// Tạo một số ngẫu nhiên theo tọa độ x thức ăn
+food_x  =  random_food ( 0 ,  solidboard . width  -  10 ) ;
+// Tạo một số ngẫu nhiên cho tọa độ y thực phẩm
+food_y  =  random_food ( 0 ,  solidboard . height  -  10 ) ;
+// nếu vị trí thức ăn mới là nơi con rắn hiện đang ở, hãy tạo một vị trí thức ăn mới
+con rắn . forEach ( function  has_snake_eaten_food ( part )  {
+const  has_eaten  =  part . x  ==  food_x  &&  part . y  ==  food_y ;
+if  ( has_eaten )  gen_food ( ) ;
+} ) ;
+}
+
+function  change_direction ( sự kiện )  {
+const  LEFT_KEY  =  37 ;
+const  RIGHT_KEY  =  39 ;
+const  UP_KEY  =  38 ;
+const  DOWN_KEY  =  40 ;
+
+// Ngăn con rắn đảo ngược
+
+if  ( thay đổi hướng_đổi )  return ;
+change_direction  =  true ;
+const  keyPressed  =  sự kiện . mã khóa ;
+const  goingUp  =  dy  ===  - 10 ;
+const  goingDown  =  dy  ===  10 ;
+const  goingRight  =  dx  ===  10 ;
+const  goingLeft  =  dx  ===  - 10 ;
+if  ( keyPressed  ===  LEFT_KEY  &&  ! goingRight )  {
+dx  =  - 10 ;
+dy  =  0 ;
+}
+if  ( keyPressed  ===  UP_KEY  &&  ! goingDown )  {
+dx  =  0 ;
+dy  =  - 10 ;
+}
+if  ( keyPressed  ===  RIGHT_KEY  &&  ! goingLeft )  {
+dx  =  10 ;
+dy  =  0 ;
+}
+if  ( keyPressed  ===  DOWN_KEY  &&  ! goingUp )  {
+dx  =  0 ;
+dy  =  10 ;
+}
+}
+
+function  move_snake ( )  {
+// Tạo đầu Snake mới
+const  head  =  { x : con rắn [ 0 ] . x  +  dx ,  y : con rắn [ 0 ] . y  +  dy } ;
+// Thêm phần đầu mới vào phần đầu của thân rắn
+con rắn . unshift ( đầu ) ;
+const  has_eaten_food  =  con rắn [ 0 ] . x  ===  food_x  &&  Snake [ 0 ] . y  ===  food_y ;
+if  ( has_eaten_food )  {
+// Tăng điểm
+điểm  + =  10 ;
+// Hiển thị điểm trên màn hình
+tài liệu . getElementById ( 'điểm' ) . innerHTML  =  điểm số ;
+// Tạo vị trí thực phẩm mới
+gen_food ( ) ;
+}  khác  {
+// Loại bỏ phần cuối cùng của cơ thể rắn
+con rắn . bật ( ) ;
+}
+}
+
+</ script >
+</ html >
